@@ -5,7 +5,6 @@ variables:
   FILEBEAT_CONFIG_MAP: filebeat-config-$CI_PIPELINE_IID
   DOCKER_PULL_SECRET: springboot-admin-gitlab-docker-secret
   IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
-  NAMESPACE: $k8s_namespace
 
 #include:
 #  - template: Container-Scanning.gitlab-ci.yml
@@ -45,18 +44,18 @@ kube_deploy_prod_hx:
     - echo $KUBE_CONFIG > kubeconfig
     - base64 -d kubeconfig > ~/.kube/config
     - kubectl config get-contexts
-    - kubectl create namespace $NAMESPACE || true
-    - kubectl -n $NAMESPACE delete secret $DOCKER_PULL_SECRET || true
-    - kubectl -n $NAMESPACE create secret docker-registry $DOCKER_PULL_SECRET --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD
+    - kubectl create namespace $k8s_namespace || true
+    - kubectl -n $k8s_namespace delete secret $DOCKER_PULL_SECRET || true
+    - kubectl -n $k8s_namespace create secret docker-registry $DOCKER_PULL_SECRET --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD
 # create configmap for first time
-    - kubectl -n $NAMESPACE create configmap $springboot_admin_configmap --from-file=config/application.yml || true
+    - kubectl -n $k8s_namespace create configmap $springboot_admin_configmap --from-file=config/application.yml || true
 # replace configmap if it already exists
-    - kubectl -n $NAMESPACE create configmap $springboot_admin_configmap --from-file=config/application.yml -o yaml --dry-run | kubectl replace -f -
+    - kubectl -n $k8s_namespace create configmap $springboot_admin_configmap --from-file=config/application.yml -o yaml --dry-run | kubectl replace -f -
 # create configmap for first time
-#    - kubectl -n $NAMESPACE create configmap $FILEBEAT_CONFIG_MAP --from-file=filebeat.yml || true
+#    - kubectl -n $k8s_namespace create configmap $FILEBEAT_CONFIG_MAP --from-file=filebeat.yml || true
 # replace configmap if it already exists
-#    - kubectl -n $NAMESPACE create configmap $FILEBEAT_CONFIG_MAP --from-file=filebeat.yml -o yaml --dry-run | kubectl replace -f -
+#    - kubectl -n $k8s_namespace create configmap $FILEBEAT_CONFIG_MAP --from-file=filebeat.yml -o yaml --dry-run | kubectl replace -f -
     - envsubst < .kubernetes.yml > kubernetes.yml
     - cat kubernetes.yml
-    - kubectl -n $NAMESPACE apply -f kubernetes.yml
+    - kubectl -n $k8s_namespace apply -f kubernetes.yml
   when: manual
