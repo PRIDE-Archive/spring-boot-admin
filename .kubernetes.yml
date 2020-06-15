@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-admin
+  labels:
+    app: springboot-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-admin
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: springboot-admin
+    spec:
+      imagePullSecrets:
+        - name: $DOCKER_PULL_SECRET
+      volumes:
+        - name: logvolume
+          persistentVolumeClaim:
+            claimName: $log_volume_pvc
+        - name: application-config
+          configMap:
+            name: $springboot_admin_configmap
+            items:
+              - key: application.yml
+                path: application.yml
+#        - name: filebeat-config
+#          configMap:
+#            name: $FILEBEAT_CONFIG_MAP
+#            items:
+#              - key: filebeat.yml
+#                path: filebeat.yml
+      containers:
+        - name: springboot-admin
+          image: $IMAGE
+#          env:
+#            - name: JAVA_OPTS
+#              value: "-Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPort=$http_proxy_port"
+#            - name: HTTP_PROXY
+#              value: "$http_proxy_host:$http_proxy_port"
+#            - name: HTTPS_PROXY
+#              value: "$http_proxy_host:$http_proxy_port"
+#            - name: http_proxy
+#              value: "$http_proxy_host:$http_proxy_port"
+#            - name: https_proxy
+#              value: "$http_proxy_host:$http_proxy_port"
+          ports:
+            - containerPort: $port
+          volumeMounts:
+            - name: application-config
+              mountPath: "/app/config/"
+              readOnly: true
+            - name: logvolume
+              mountPath: $logpath
+          livenessProbe:
+            httpGet:
+              path: $context_path/actuator/health
+              port: $port
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: $context_path/actuator/health
+              port: $port
+            initialDelaySeconds: 60
+            periodSeconds: 10
+#        - name: filebeat-sidecar
+#          image: docker.elastic.co/beats/filebeat:7.4.2
+#          env:
+#            - name: POD_NAMESPACE
+#              valueFrom:
+#                fieldRef:
+#                  apiVersion: v1
+#                  fieldPath: metadata.namespace
+#            - name: NODE_NAME
+#              valueFrom:
+#                fieldRef:
+#                  apiVersion: v1
+#                  fieldPath: spec.nodeName
+#          volumeMounts:
+#            - name: logvolume
+#              mountPath: $logpath
+#            - name: filebeat-config
+#              mountPath: /usr/share/filebeat/filebeat.yml
+#              subPath: filebeat.yml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-admin-service
+spec:
+  selector:
+    app: springboot-admin
+  ports:
+    - protocol: TCP
+      port: $port
+      targetPort: $port
+  type: NodePort

@@ -1,0 +1,28 @@
+spring.application.name: $app_name
+
+server:
+  port: $port
+  servlet:
+    contextPath: $contextPath
+
+logging:
+  file.path: $logspath/$app_name/logs_${HOSTNAME}/
+
+spring.security.user:
+  name: $user
+  password: $password
+
+#configs to connect to self register the admin server as a client
+spring.boot.admin.client.url: http://localhost:$port
+spring.boot.admin.client:
+  username: ${spring.security.user.name}
+  password: ${spring.security.user.password}
+
+#configs to give secured server info
+spring.boot.admin.client.instance.metadata.user:
+  name: ${spring.security.user.name}
+  password: ${spring.security.user.password}
+
+management.endpoints:
+  web.exposure.include: '*'
+  health.show-details: always
