@@ -13,7 +13,7 @@ spring.security.user:
   password: $password
 
 #configs to connect to self register the admin server as a client
-spring.boot.admin.client.url: http://localhost:$port
+spring.boot.admin.client.url: http://localhost:$port$contextPath
 spring.boot.admin.client:
   username: ${spring.security.user.name}
   password: ${spring.security.user.password}
