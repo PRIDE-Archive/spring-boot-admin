@@ -70,7 +70,7 @@ spec:
               mountPath: "/app/config/"
               readOnly: true
             - name: logvolume
-              mountPath: $logpath
+              mountPath: $logspath
           livenessProbe:
             httpGet:
               path: $contextPath/actuator/health
