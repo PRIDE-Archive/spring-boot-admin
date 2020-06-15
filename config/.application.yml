@@ -6,7 +6,7 @@ server:
     contextPath: $contextPath
 
 logging:
-  file.path: $logspath/$app_name/logs_${HOSTNAME}/
+  file.path: $logspath/logs_${HOSTNAME}/
 
 spring.security.user:
   name: $user
