@@ -73,13 +73,13 @@ spec:
               mountPath: $logpath
           livenessProbe:
             httpGet:
-              path: $context_path/actuator/health
+              path: $contextPath/actuator/health
               port: $port
             initialDelaySeconds: 60
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: $context_path/actuator/health
+              path: $contextPath/actuator/health
               port: $port
             initialDelaySeconds: 60
             periodSeconds: 10
