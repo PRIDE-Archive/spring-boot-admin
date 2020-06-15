@@ -22,7 +22,8 @@ docker_build:
     - docker build -t $IMAGE .
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker push $IMAGE
-
+  when: manual
+  
 kube_deploy_prod_hh:
   environment: prod-k8s-hh
   extends: .kube_deploy_script
