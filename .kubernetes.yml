@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: springboot-admin
+  name: $app_name
   labels:
-    app: springboot-admin
+    app: $app_name
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: springboot-admin
+      app: $app_name
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        app: springboot-admin
+        app: $app_name
     spec:
       imagePullSecrets:
         - name: $DOCKER_PULL_SECRET
@@ -27,7 +27,7 @@ spec:
             claimName: $log_volume_pvc
         - name: application-config
           configMap:
-            name: $springboot_admin_configmap
+            name: $SPRING_CONFIG_MAP
             items:
               - key: application.yml
                 path: application.yml
@@ -38,7 +38,7 @@ spec:
 #              - key: filebeat.yml
 #                path: filebeat.yml
       containers:
-        - name: springboot-admin
+        - name: $app_name
           image: $IMAGE
 #          env:
 #            - name: JAVA_OPTS
@@ -94,10 +94,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: springboot-admin-service
+  name: $app_name-service
 spec:
   selector:
-    app: springboot-admin
+    app: $app_name
   ports:
     - protocol: TCP
       port: $port

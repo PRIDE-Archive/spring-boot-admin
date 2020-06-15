@@ -1,9 +1,9 @@
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
-  springboot_admin_configmap: springboot-admin-configmap-$CI_PIPELINE_IID
+  SPRING_CONFIG_MAP: spring-configmap-$CI_PIPELINE_IID
   FILEBEAT_CONFIG_MAP: filebeat-config-$CI_PIPELINE_IID
-  DOCKER_PULL_SECRET: springboot-admin-gitlab-docker-secret
+  DOCKER_PULL_SECRET: pride-gitlab-docker-secret
   IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
 
 #include:
@@ -48,9 +48,9 @@ kube_deploy_prod_hx:
     - kubectl -n $k8s_namespace delete secret $DOCKER_PULL_SECRET || true
     - kubectl -n $k8s_namespace create secret docker-registry $DOCKER_PULL_SECRET --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD
 # create configmap for first time
-    - kubectl -n $k8s_namespace create configmap $springboot_admin_configmap --from-file=config/application.yml || true
+    - kubectl -n $k8s_namespace create configmap $SPRING_CONFIG_MAP --from-file=config/application.yml || true
 # replace configmap if it already exists
-    - kubectl -n $k8s_namespace create configmap $springboot_admin_configmap --from-file=config/application.yml -o yaml --dry-run | kubectl replace -f -
+    - kubectl -n $k8s_namespace create configmap $SPRING_CONFIG_MAP --from-file=config/application.yml -o yaml --dry-run | kubectl replace -f -
 # create configmap for first time
 #    - kubectl -n $k8s_namespace create configmap $FILEBEAT_CONFIG_MAP --from-file=filebeat.yml || true
 # replace configmap if it already exists
